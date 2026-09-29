@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>WeWard — onboarding &amp; paywall rebuild</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: only light;
+  /* ── WeWard's own palette, sampled from the supplied frames ── */
+  --ww-orange:#FF732C;        /* onboarding CTA, progress, skip, back arrow */
+  --ww-orange-dim:#FFB28C;    /* disabled CTA */
+  --ww-orange-tint:#FEF2EA;   /* selected option fill */
+  --ww-orange-line:#FF9A66;   /* selected option border */
+  --ww-mint:#F1FBF6;          /* Wardy speech-bubble fill */
+  --ww-mint-line:#7FE3B2;     /* Wardy speech-bubble border */
+  --ww-green:#3CE88A;         /* avatar disc, celebration disc */
+  --ww-teal:#16936B;          /* daily-goal numerals */
+  --ww-teal-glow:#BDEFE0;
+  --ww-gauge-light:#F7C099;
+  --ww-ink:#1A1A1A;
+  --ww-ink-2:#3B3F44;
+  --ww-muted:#8A9097;
+  --ww-line:#ECEFF1;
+  --ww-soft:#F4F6F8;          /* back-button disc, progress track */
+  --ww-purple:#755DFF;        /* Premium CTA */
+  --ww-purple-ink:#6A52E8;    /* Premium accent text, checks */
+  --ww-purple-line:#8572DC;   /* selected plan border */
+  --ww-purple-badge:#7E70D7;  /* "Most popular" tab */
+  --ww-lav:#F2EAFF;           /* selected plan fill, Premium column */
+  --ww-hero-a:#6249D8;        /* plans hero top edge */
+  --r-ctl:12px;               /* option cards, inputs */
+  --r-media:24px;             /* speech bubbles, cards */
+  --r-pill:999px;             /* CTAs */
+
+  /* ── Presentation shell (not WeWard's) ── */
+  --accent:#FF732C;
+  --accent-ink:#B4480F;
+  --page:#101214; --bar:#181B1E; --hair:#23272B;
+  --panel:#FFFFFF; --panel-ink:#15181B; --panel-muted:#5F666D; --panel-line:#E6E9EC;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:#E8EAED;font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+[hidden]{display:none!important}
+
+/* ════════ STUDIO SHELL ════════ */
+.st-bar{position:sticky;top:0;z-index:50;height:58px;background:var(--bar);border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:14px;padding:0 20px}
+.st-dot{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;color:#fff;font:800 13px/1 Figtree,sans-serif;flex:none}
+.st-name{font-weight:700;font-size:14.5px;color:#fff;white-space:nowrap}
+.st-name small{display:block;font-weight:500;font-size:11.5px;color:#8C949C;margin-top:2px}
+.st-src{margin-left:8px;background:transparent;border:1px solid #3A4046;color:#D5D9DD;border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:600}
+.st-src:hover{border-color:#5A6168}
+.st-tabs{margin-left:auto;background:var(--hair);border-radius:999px;padding:3px;display:flex;gap:2px}
+.st-tab{border:0;background:transparent;color:#AEB5BC;border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:700}
+.st-tab.on{background:var(--accent);color:#fff}
+
+.st-stage{display:grid;grid-template-columns:minmax(440px,1fr) minmax(400px,480px);gap:0;align-items:start;min-height:calc(100vh - 58px)}
+@media(max-width:1080px){.st-stage{grid-template-columns:1fr}.st-panelcol{position:static!important;max-height:none!important}}
+.st-phonecol{padding:30px 24px 44px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.st-panelcol{border-left:1px solid var(--hair);background:#fff;color:var(--panel-ink);min-height:calc(100vh - 58px);position:sticky;top:58px;max-height:calc(100vh - 58px);overflow-y:auto}
+
+.st-phone{width:412px;height:866px;border-radius:46px;background:#000;padding:11px;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px #2A2E33;flex:none}
+.st-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:640px}
+.st-chip{border:1px solid #2C3136;background:#1B1F22;color:#C9CED3;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:600}
+.st-chip:hover{border-color:#454C53}
+.st-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.st-chip.offer{border:1px dashed #9C8BFF;color:#C8BEFF;background:#1D1A2E}
+.st-chip.offer.on{background:#755DFF;border:1px solid #755DFF;color:#fff}
+.st-hint{font-size:12px;color:#7D858D;text-align:center;max-width:560px;line-height:1.5}
+
+/* side panel */
+.pn{padding:30px 32px 36px}
+.pn-step{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--panel-muted)}
+.pn-title{font-size:22px;font-weight:700;letter-spacing:-.015em;margin:8px 0 12px;line-height:1.25}
+.pn-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px}
+.pn-tag{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:4px 9px}
+.pn-tag.kept{background:#E8F7ED;color:#146B31}.pn-tag.merged{background:#EAF0FB;color:#1B4C9B}
+.pn-tag.moved{background:#FDF2E2;color:#8A5410}.pn-tag.cut{background:#FBEAEA;color:#94211F}.pn-tag.new{background:#F1EAFB;color:#5A2C9B}
+.pn-sec{margin-bottom:20px}
+.pn-lab{display:flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--panel-ink);margin-bottom:7px}
+.pn-lab::before{content:'';width:14px;height:2px;flex:none;background:var(--accent);border-radius:2px}
+.pn-txt{font-size:14px;line-height:1.6;color:#2E3338}
+.pn-imp{background:#F8F6F4;border:1px solid var(--panel-line);border-left:3px solid var(--accent);border-radius:8px;padding:13px 15px;margin:4px 0 20px}
+.pn-imp .v{font-size:17px;font-weight:800;letter-spacing:-.02em;color:var(--accent-ink)}
+.pn-imp .l{font-size:11.5px;color:var(--panel-muted);margin-top:2px}
+.pn-foot{font-size:12px;line-height:1.55;color:var(--panel-muted);border-top:1px solid var(--panel-line);padding-top:14px}
+.pn-foot b{color:var(--panel-ink)}
+.pn-foot a,.rk-note a{color:var(--accent-ink);font-weight:600;cursor:pointer;text-decoration:underline}
+
+/* tab 2 */
+.rk{max-width:1120px;margin:0 auto;padding:40px 28px 70px}
+.rk h2{font-size:28px;letter-spacing:-.02em;margin:0 0 6px;color:#fff}
+.rk-sub{color:#8C949C;font-size:14px;margin:0 0 24px}
+.rk table{width:100%;border-collapse:collapse;font-size:14px}
+.rk th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#7D858D;font-weight:700;padding:10px 12px;border-bottom:1px solid var(--hair)}
+.rk td{padding:14px 12px;border-bottom:1px solid var(--hair);vertical-align:top;line-height:1.5;color:#D2D6DA}
+.rk td.n{color:#6C747C;font-weight:700;width:34px}
+.rk td.c{font-weight:700;color:#fff;width:230px}
+.rk td.i{color:#7FE3A0;font-weight:700;white-space:nowrap}
+.rk-pr{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.rk-pr.f{background:#4A1F1A;color:#FF9B88}.rk-pr.h{background:#4A3712;color:#F5C46A}.rk-pr.m{background:#17324F;color:#8FC2F0}.rk-pr.l{background:#2A2F33;color:#9AA3AD}
+.rk-note{margin-top:20px;font-size:12.5px;color:#7D858D;font-style:italic}
+
+/* sources modal */
+.st-modal{position:fixed;inset:0;background:rgba(5,6,8,.72);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:50px 20px;overflow-y:auto}
+.st-modal.open{display:flex}
+.st-mcard{background:#fff;color:var(--panel-ink);border-radius:14px;max-width:760px;width:100%;padding:28px 30px 30px;position:relative}
+.st-mcard h3{margin:0 0 4px;font-size:20px}
+.st-mcard .s{color:var(--panel-muted);font-size:13px;margin:0 0 18px}
+.st-mclose{position:absolute;right:16px;top:14px;border:0;background:#F1F3F5;border-radius:8px;width:32px;height:32px;font-size:18px;color:#444}
+.st-mcard dl{margin:0;display:grid;grid-template-columns:minmax(180px,34%) 1fr;gap:0}
+.st-mcard dt,.st-mcard dd{padding:10px 0;border-bottom:1px solid var(--panel-line);font-size:13.5px;line-height:1.5;margin:0}
+.st-mcard dt{font-weight:700;padding-right:14px}
+.st-mcard dd{color:#3A4046}
+.st-mcard dd a{color:var(--accent-ink)}
+.st-mcard h4{grid-column:1/-1;margin:22px 0 4px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--panel-muted)}
+
+/* ════════ PHONE — WeWard screens (scr-* only) ════════ */
+.screenwrap{position:relative;width:390px;height:844px;border-radius:36px;overflow:hidden;background:#fff;color:var(--ww-ink);font-family:Figtree,system-ui,sans-serif;color-scheme:only light}
+.scr-island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:122px;height:35px;border-radius:20px;background:#000;z-index:40}
+.scr-status{position:absolute;top:0;left:0;right:0;height:47px;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:4px 30px 0 44px;font:600 16px/1 -apple-system,'SF Pro Text',Inter,sans-serif;color:#000;pointer-events:none;transition:color .2s}
+.scr-status.lt{color:#fff}
+.scr-status svg{display:block}
+.scr-status .ic{display:flex;gap:6px;align-items:center}
+
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;background:#fff;transform:translateX(100%);transition:transform .36s cubic-bezier(.32,.72,0,1);padding-top:47px}
+.scr.is-active{transform:translateX(0);z-index:5}
+.scr.is-past{transform:translateX(-24%)}
+.scr.sheet{transform:translateY(100%)}
+.scr.sheet.is-active{transform:translateY(0);z-index:6}
+.scr.nofx{transition:none!important}
+.scr.full{padding-top:0}
+.scr-top{flex:none}
+.scr-body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none}
+.scr-body::-webkit-scrollbar{display:none}
+.scr-body.dock{display:flex;flex-direction:column}
+.scr-foot{flex:none;padding:10px 16px 26px;display:flex;flex-direction:column;align-items:center;gap:12px;background:#fff}
+
+.scr-backrow{height:64px;display:flex;align-items:center;padding:0 14px}
+.scr-back{width:42px;height:42px;border-radius:50%;background:var(--ww-soft);border:0;display:grid;place-items:center}
+.scr-prog{height:6px;background:var(--ww-soft);border-radius:0 6px 6px 0;margin:2px 0 0}
+.scr-prog i{display:block;height:100%;background:var(--ww-orange);border-radius:0 6px 6px 0;transition:width .4s}
+.scr-prog.flat{margin:8px 0 0}
+
+.scr-cta{width:100%;height:48px;border:0;border-radius:var(--r-pill);background:var(--ww-orange);color:#fff;font:600 18.5px/1 Figtree,sans-serif;letter-spacing:.005em}
+.scr-cta:disabled{background:var(--ww-orange-dim);cursor:default}
+.scr-cta.pu{background:var(--ww-purple)}
+.scr-skip{border:0;background:none;color:var(--ww-orange);font:600 18.5px/1 Figtree,sans-serif;padding:4px 20px}
+.scr-helper{font-size:14px;color:#2B2F33;text-align:center;line-height:1.35}
+.scr-helper b{font-weight:700}
+
+/* Wardy bubble row */
+.scr-wardy{display:grid;grid-template-columns:94px 1fr;gap:14px;padding:22px 16px 0 22px;align-items:start}
+.scr-ava{width:94px;height:94px;border-radius:50%;overflow:hidden;background:var(--ww-green)}
+.scr-ava img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.12)}
+.scr-who{font-weight:600;font-size:16px;margin:0 0 8px 2px;color:#222}
+.scr-bub{background:var(--ww-mint);border:1.5px solid var(--ww-mint-line);border-radius:var(--r-media);padding:13px 16px;font-size:16px;line-height:1.45;color:#1E2226}
+.scr-bub b{font-weight:700}
+.scr-bub2{margin:12px 16px 0;display:inline-block;max-width:calc(100% - 32px)}
+.scr-wrap2{padding:0}
+
+.scr-h1{font-size:27px;font-weight:700;letter-spacing:-.01em;text-align:center;line-height:1.2;margin:0 18px}
+.scr-p{font-size:16.5px;line-height:1.5;text-align:center;color:#2B2F33;margin:14px 18px 0}
+.scr-ill{display:block;margin:0 auto}
+
+/* inputs */
+.scr-lab{font-weight:600;font-size:15.5px;margin:26px 16px 10px}
+.scr-input{margin:0 16px;height:52px;border:1.5px solid var(--ww-orange);border-radius:var(--r-ctl);display:flex;align-items:center;padding:0 16px}
+.scr-input input{border:0;outline:0;font:500 17px Figtree,sans-serif;width:100%;color:#222;background:transparent}
+.scr-input.soft{border:0;background:#F6F8FA}
+.scr-input input::placeholder{color:#8B93A1}
+
+/* radio options */
+.scr-opts{display:flex;flex-direction:column;gap:8px;margin:16px 14px 0}
+.scr-opt{height:54px;border:1px solid var(--ww-line);border-radius:var(--r-ctl);background:#fff;display:flex;align-items:center;gap:16px;padding:0 20px;font:500 17px Figtree,sans-serif;color:#222;box-shadow:0 1px 4px rgba(20,30,40,.05);text-align:left;width:100%}
+.scr-opt .rd{width:22px;height:22px;border-radius:50%;border:1.5px solid #DADFE3;flex:none;display:grid;place-items:center}
+.scr-opt.on{background:var(--ww-orange-tint);border:1.5px solid var(--ww-orange-line);color:var(--ww-orange);font-weight:600}
+.scr-opt.on .rd{background:var(--ww-orange);border-color:var(--ww-orange)}
+
+/* chips */
+.scr-chips{display:flex;flex-wrap:wrap;gap:12px 14px;margin:16px 16px 0}
+.scr-chipb{height:44px;border:1px solid #E7EBEE;border-radius:10px;background:#fff;display:flex;align-items:center;gap:10px;padding:0 14px 0 12px;font:500 17px Figtree,sans-serif;color:#2F3439;box-shadow:0 1px 4px rgba(20,30,40,.05)}
+.scr-chipb .gi{width:24px;height:24px;background:#C9CFD8;-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;flex:none}
+.scr-chipb.on{border:1.5px solid var(--c);background:var(--t);color:var(--c)}
+.scr-chipb.on .gi{background:var(--c)}
+
+/* wheel */
+.scr-wheel{position:relative;height:238px;margin:34px 36px 0}
+.scr-wheel-hl{position:absolute;left:0;right:0;top:102px;height:34px;border-top:1px solid #E5E5E5;border-bottom:1px solid #E5E5E5;pointer-events:none}
+.scr-wheel-col{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.scr-wheel-col::-webkit-scrollbar{display:none}
+.scr-wheel-it{height:34px;display:flex;align-items:center;justify-content:center;font:400 19px/1 -apple-system,Inter,sans-serif;color:#333;scroll-snap-align:center;transition:transform .12s,opacity .12s}
+.scr-wheel-sp{height:102px}
+
+/* loader */
+.scr-lines{margin:26px 22px 0;display:flex;flex-direction:column;gap:14px}
+.scr-line{display:flex;gap:12px;align-items:center;font-size:16px;color:#9AA0A6;transition:color .3s}
+.scr-line .dotc{width:24px;height:24px;border-radius:50%;border:2px solid #E4E7EA;flex:none;display:grid;place-items:center;transition:all .3s}
+.scr-line.done{color:#1E2226}
+.scr-line.done .dotc{background:var(--ww-orange);border-color:var(--ww-orange)}
+.scr-line.run .dotc{border-color:var(--ww-orange);border-right-color:transparent;animation:scrspin .8s linear infinite}
+@keyframes scrspin{to{transform:rotate(360deg)}}
+.scr-quote{margin:34px 16px 14px;background:var(--ww-mint);border:1.5px solid var(--ww-mint-line);border-radius:var(--r-media);padding:16px 18px;overflow:hidden}
+.scr-qtrack{display:flex;transition:transform .5s ease}
+.scr-qslide{flex:0 0 100%}
+.scr-qslide .st{color:#FFB800;font-size:15px;letter-spacing:1px}
+.scr-qslide p{margin:6px 0 6px;font-size:15.5px;line-height:1.45;color:#1E2226}
+.scr-qslide small{font-size:13px;color:#6B7178;font-weight:600}
+.scr-qdots{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.scr-qdots i{width:6px;height:6px;border-radius:50%;background:#CFE9DC}
+.scr-qdots i.on{background:var(--ww-teal)}
+.scr-proofline{text-align:center;font-size:14px;color:#3B3F44;margin:0 16px 14px}
+.scr-proofline b{color:var(--ww-teal)}
+
+/* goal */
+.scr-goalc{width:262px;height:262px;border-radius:50%;margin:40px auto 0;background:#fff;box-shadow:0 0 0 18px #F1FBF8,0 0 60px 24px var(--ww-teal-glow);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ww-teal)}
+.scr-goalc .n{font:800 66px/1 Inter,sans-serif;letter-spacing:-.02em}
+.scr-goalc .u{font:400 46px/1.1 Inter,sans-serif}
+.scr-from{margin:44px 16px 0;text-align:center}
+.scr-from .k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8A9097}
+.scr-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:10px}
+.scr-tags span{font-size:14px;font-weight:600;border-radius:999px;padding:6px 12px;background:#EFFAF5;color:#146E52}
+.scr-week{margin-top:14px;font-size:15.5px;color:#2B2F33}
+.scr-week b{color:var(--ww-teal)}
+
+/* commit */
+.scr-starw{position:relative;width:210px;height:205px;margin:34px auto 0;user-select:none;-webkit-user-select:none;touch-action:none;cursor:pointer}
+.scr-starw img{width:100%;height:100%;display:block;transition:transform .2s,filter .3s;pointer-events:none}
+.scr-starw.hold img{transform:scale(1.07);filter:saturate(1.8) drop-shadow(0 0 18px rgba(60,232,138,.7))}
+.scr-starw.done img{transform:scale(1.1);filter:saturate(2.2) drop-shadow(0 0 26px rgba(60,232,138,.9))}
+.scr-ring{position:absolute;left:50%;bottom:-38px;transform:translateX(-50%);width:150px;height:6px;border-radius:6px;background:#E9F6F0;overflow:hidden}
+.scr-ring i{display:block;height:100%;width:0;background:var(--ww-green)}
+.scr-holdhint{text-align:center;font-size:14.5px;color:#6B7178;margin-top:50px}
+.scr-24{margin:auto 16px 0;text-align:center;font-size:14.5px;color:#3B3F44}
+.scr-24 b{color:var(--ww-teal)}
+
+/* gauge */
+.scr-gauge{position:relative;width:300px;height:300px;margin:34px auto 0}
+.scr-gauge svg{position:absolute;inset:0}
+.scr-gauge .pd{position:absolute;left:50%;top:78px;transform:translateX(-50%);width:98px}
+.scr-gift{position:absolute;right:38px;bottom:52px;width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid var(--ww-gauge-light);display:grid;place-items:center;overflow:hidden;transition:all .3s}
+.scr-gift.coin{border-color:var(--ww-orange);background:radial-gradient(circle,#FFE06A 50%,#F2B81C 100%)}
+
+/* wards card */
+.scr-wcard{margin:26px 16px 0;border-radius:36px 36px 20px 20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.14)}
+.scr-wtop{position:relative;height:130px;background:linear-gradient(180deg,#FF6E21,#FFA93F 80%,#FEBD56);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.scr-wtop .pill{position:absolute;left:17px;top:64px;background:#fff;border-radius:999px;height:23px;padding:0 10px 0 5px;display:flex;align-items:center;gap:5px;font:600 14px Figtree,sans-serif}
+.scr-wtop .pill i{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle,#FFD84D 55%,#F0B400 60%)}
+.scr-wtop .up{font-size:14px;color:#3A2410;margin-top:10px}
+.scr-wtop .eur{font:800 34px/1.05 Inter,sans-serif;color:#1A1A1A;letter-spacing:-.01em}
+.scr-coin{position:absolute;right:-26px;top:34px;width:104px;height:104px;border-radius:50%;background:radial-gradient(circle at 42% 40%,#FFF1A6 0,#FFE06A 38%,#F8C928 62%,#E9A800 100%);box-shadow:inset 0 0 0 7px #FFE784,inset 0 0 0 9px #F2B81C,-2px 3px 0 #E39A00;display:grid;place-items:center}
+.scr-coin b{font:italic 900 46px/1 Inter,sans-serif;color:#FFF7C8;text-shadow:0 2px 0 #E8A600;margin-right:18px}
+.scr-wbody{background:#fff;padding:12px 16px 18px}
+.scr-wrow{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 10px}
+.scr-wrow b{font-size:19px}
+.scr-wrow span{color:var(--ww-orange);font-size:16px;font-weight:500}
+.scr-gc{border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);width:250px}
+.scr-gc img{width:100%;display:block}
+.scr-gc.ph{height:112px}
+
+/* Premium hero */
+.scr-hero{position:relative;flex:none}
+.scr-hero img{display:block;width:390px}
+.scr-x{position:absolute;width:30px;height:30px;border-radius:50%;background:#fff;border:0;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.scr-ptitle{font-size:24.5px;font-weight:700;text-align:center;line-height:1.25;margin:4px 18px 0;letter-spacing:-.005em}
+.scr-ptitle em{font-style:normal;color:var(--ww-purple-ink)}
+.scr-psub{text-align:center;font-size:15px;color:#3B3F44;margin:8px 18px 0}
+.scr-psub em{font-style:normal;color:var(--ww-purple-ink);font-weight:700}
+.scr-gchip{display:flex;justify-content:center;margin-top:6px}
+.scr-gchip span{background:var(--ww-lav);color:#5B45D6;font-weight:600;font-size:13.5px;border-radius:999px;padding:6px 12px}
+.scr-tbl{margin:8px 16px 4px;position:relative}
+.scr-tbl .colbg{position:absolute;right:0;top:0;bottom:0;width:78px;background:#EFE6FF;border-radius:14px}
+.scr-tr{position:relative;display:grid;grid-template-columns:1fr 64px 78px;align-items:center;min-height:36px;border-bottom:1.5px solid #EEEAFB}
+.scr-tr:last-child{border-bottom:0}
+.scr-tr.h{min-height:34px;border-bottom:0;font-weight:700;font-size:15.5px}
+.scr-tr.h span{text-align:center}
+.scr-tr .lb{font-size:15.5px;color:#222}
+.scr-tr .c{display:flex;justify-content:center}
+.scr-tr .dash{width:14px;height:2px;background:#E6E6EE;border-radius:2px}
+
+.scr-proof{display:flex;justify-content:center;gap:8px;align-items:center;margin:10px 16px 0;font-size:14px;color:#3B3F44;flex-wrap:nowrap;white-space:nowrap}
+.scr-proof .stars{color:#FFB800;letter-spacing:.5px}
+.scr-proof b{color:#1A1A1A}
+.scr-proof .sep{width:3px;height:3px;border-radius:50%;background:#B8BDC3}
+.scr-plans{margin:14px 16px 0;display:flex;flex-direction:column;gap:12px}
+.scr-plan{position:relative;border:2px solid transparent;border-radius:12px;background:#fff;box-shadow:0 2px 12px rgba(30,20,80,.08);display:flex;align-items:center;justify-content:space-between;padding:0 18px;min-height:70px;text-align:left;width:100%;font-family:Figtree,sans-serif;color:#1A1A1A}
+.scr-plan .nm{font-size:19px;font-weight:700}
+.scr-plan .pr{font-size:16.5px}
+.scr-plan .old{font-size:16px;margin-top:4px}
+.scr-plan .old s{color:#8A8F96;margin-right:6px}
+.scr-plan.on{background:var(--ww-lav);border-color:var(--ww-purple-line)}
+.scr-plan.yr{min-height:92px;padding-top:14px}
+.scr-badge{position:absolute;left:-2px;top:-2px;background:var(--ww-purple-badge);color:#fff;font-size:13.5px;font-weight:600;padding:4px 10px;border-radius:11px 0 11px 0}
+.scr-save{position:absolute;right:12px;top:-11px;background:#FF732C;color:#fff;font-size:12px;font-weight:800;letter-spacing:.03em;padding:4px 9px;border-radius:999px}
+
+/* offer */
+.scr-oclose{position:absolute;right:16px;top:58px;width:32px;height:32px;border-radius:50%;background:#F3F0FF;border:0;display:grid;place-items:center;z-index:3}
+.scr-otitle{font-size:25px;font-weight:700;text-align:center;line-height:1.22;margin:4px 22px 0}
+.scr-otitle em{font-style:normal;color:var(--ww-purple-ink)}
+.scr-tl{margin:22px 26px 0;position:relative}
+.scr-tl::before{content:'';position:absolute;left:15px;top:18px;bottom:22px;width:3px;background:linear-gradient(#755DFF,#C7BCFF);border-radius:3px}
+.scr-tli{position:relative;display:grid;grid-template-columns:34px 1fr;gap:14px;padding-bottom:18px}
+.scr-tli .dt{width:34px;height:34px;border-radius:50%;background:var(--ww-purple);display:grid;place-items:center;color:#fff;z-index:1}
+.scr-tli .dt.lt{background:#E6E0FF;color:#5B45D6}
+.scr-tli b{display:block;font-size:16.5px;margin-top:2px}
+.scr-tli span{font-size:14.5px;color:#4B5056;line-height:1.4}
+.scr-down{border:0;background:none;color:var(--ww-purple-ink);font:600 15.5px Figtree,sans-serif;text-decoration:underline;text-underline-offset:3px}
+.scr-down.on{text-decoration:none;background:var(--ww-lav);border-radius:999px;padding:6px 12px}
+
+.scr-toast{position:absolute;left:16px;right:16px;bottom:118px;background:rgba(20,22,26,.92);color:#fff;font:500 14px/1.4 Inter,sans-serif;padding:11px 14px;border-radius:12px;z-index:60;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;text-align:center}
+.scr-toast.show{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<header class="st-bar">
+  <div class="st-dot">W</div>
+  <div class="st-name">WeWard — onboarding &amp; paywall rebuild<small>Sequence re-ordered · art direction untouched</small></div>
+  <button class="st-src" data-open-src>Sources &amp; grounding</button>
+  <div class="st-tabs">
+    <button class="st-tab on" data-tab="proto">Prototype</button>
+    <button class="st-tab" data-tab="rank">Before → After</button>
+  </div>
+</header>
+
+<main id="view-proto" class="st-stage">
+  <div class="st-phonecol">
+    <div class="st-phone">
+      <div class="screenwrap" id="phone">
+        <div class="scr-island"></div>
+        <div class="scr-status" id="status">
+          <span>9:41</span>
+          <span class="ic">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.3-1.3A10.3 10.3 0 0 0 8 .3 10.3 10.3 0 0 0 .7 3.3L2 4.6a8.4 8.4 0 0 1 6-2.4Zm0 3.7c1.3 0 2.5.5 3.4 1.3l1.3-1.3A6.6 6.6 0 0 0 8 4a6.6 6.6 0 0 0-4.7 1.9l1.3 1.3C5.5 6.4 6.7 5.9 8 5.9Zm0 3.6c.5 0 1 .2 1.3.5L8 11.3 6.7 10c.3-.3.8-.5 1.3-.5Z"/></svg>
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" fill="currentColor" opacity=".45"/></svg>
+          </span>
+        </div>
+
+        <!-- 1 · hello -->
+        <section class="scr" data-id="hello">
+          <div class="scr-body">
+            <div style="height:128px"></div>
+            <h1 class="scr-h1">Hi! I'm Wardy.</h1>
+            <div class="scr-bub" style="margin:26px 16px 0">Like 30M users, you decided to take care of your health and your wallet. Congrats!</div>
+            <img class="scr-ill" src="img/hello.png" alt="" style="width:241px;margin-top:22px">
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Continue</button></div>
+        </section>
+
+        <!-- 2 · own -->
+        <section class="scr" data-id="own">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div></div>
+          <div class="scr-body">
+            <img class="scr-ill" src="img/own.png" alt="" style="width:246px;margin-top:124px">
+            <h1 class="scr-h1" style="margin-top:34px">Make the App Your Own</h1>
+            <p class="scr-p">Get recommendations and content that match how you move with WeWard.</p>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Continue</button></div>
+        </section>
+
+        <!-- 3 · name -->
+        <section class="scr" data-id="name">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">So, first things first…</div></div></div>
+            <div class="scr-bub scr-bub2">What's your name?</div>
+            <div class="scr-lab">Name</div>
+            <div class="scr-input"><input id="nameIn" placeholder="Add your full name" autocomplete="off"></div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" id="nameCta" data-next>Continue</button><button class="scr-skip" data-skip="name">Skip</button></div>
+        </section>
+
+        <!-- 4 · gender -->
+        <section class="scr" data-id="gender">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">Nice to meet you<span data-b="nameComma"></span>! Which option fits you best?</div></div></div>
+            <div class="scr-bub scr-bub2">This helps me fine-tune your calorie estimates.</div>
+            <div class="scr-opts" id="genderOpts"></div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Continue</button><button class="scr-skip" data-skip="gender">Skip</button></div>
+        </section>
+
+        <!-- 5 · age -->
+        <section class="scr" data-id="age">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">How old are you?</div></div></div>
+            <div class="scr-bub scr-bub2">Don't worry, I'm not counting candles! Just adapting goals and rewards to your walking pace.</div>
+            <div class="scr-wheel"><div class="scr-wheel-hl"></div><div class="scr-wheel-col" id="ageCol"></div></div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Continue</button><button class="scr-skip" data-skip="age">Skip</button></div>
+        </section>
+
+        <!-- 6 · goals -->
+        <section class="scr" data-id="goals">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">What brings you to WeWard?</div></div></div>
+            <div class="scr-bub scr-bub2">Pick the options that fit you best:</div>
+            <div class="scr-chips" id="goalChips"></div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" id="goalsCta" data-next>Continue</button></div>
+        </section>
+
+        <!-- 7 · loader (new) -->
+        <section class="scr" data-id="loader">
+          <div class="scr-top"><div class="scr-prog flat"><i></i></div></div>
+          <div class="scr-body dock">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">Give me a second<span data-b="nameComma"></span>. I'm setting things up for you.</div></div></div>
+            <div class="scr-lines" id="ldLines"></div>
+            <div class="scr-quote">
+              <div style="overflow:hidden"><div class="scr-qtrack" id="qTrack">
+                <div class="scr-qslide"><div class="st">★★★★★</div><p>“I can’t believe there’s an app that makes walking exciting and rewards you at the same time.”</p><small>Steve · App Store</small></div>
+                <div class="scr-qslide"><div class="st">★★★★★</div><p>“This app has motivated me to get out and start exploring again.”</p><small>Stella · Google Play</small></div>
+                <div class="scr-qslide"><div class="st">★★★★★</div><p>“After a long injury recovery process, I needed something to motivate me to get back in action.”</p><small>Nick · Trustpilot</small></div>
+              </div></div>
+              <div class="scr-qdots" id="qDots"><i class="on"></i><i></i><i></i></div>
+            </div>
+            <div class="scr-proofline">Loved by <b>30 million walkers</b> across 29 countries</div>
+          </div>
+        </section>
+
+        <!-- 8 · daily goal -->
+        <section class="scr" data-id="goal">
+          <div class="scr-top"><div class="scr-prog flat"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">To get you started, I've set <b>a daily goal</b> for you.</div></div></div>
+            <div class="scr-goalc"><div class="n">4,500</div><div class="u">steps</div></div>
+            <div class="scr-from">
+              <div class="k">Set from your answers</div>
+              <div class="scr-tags" id="goalTags"></div>
+              <div class="scr-week">That's <b>31,500 steps</b> a week.</div>
+            </div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Continue</button></div>
+        </section>
+
+        <!-- 9 · commit -->
+        <section class="scr" data-id="commit">
+          <div class="scr-top"><div class="scr-prog flat"><i></i></div></div>
+          <div class="scr-body dock">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">Ready to reach it every day and push your daily average higher?</div></div></div>
+            <h2 class="scr-h1" style="font-size:24px;margin-top:46px">I will reach my goal</h2>
+            <p class="scr-p" style="margin-top:8px;font-size:16px">to improve my walking habits for a healthier me.</p>
+            <div class="scr-starw" id="star"><img src="img/star.png" alt=""><div class="scr-ring"><i id="starRing"></i></div></div>
+            <div class="scr-holdhint" id="holdHint">Press and hold the star</div>
+            <div class="scr-24" style="margin-bottom:26px">On average, WeWarders walk <b>24% more</b>.</div>
+          </div>
+        </section>
+
+        <!-- 10 · health -->
+        <section class="scr" data-id="health">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">Your phone is all you need, but you can also use an <b>Apple Watch</b>!</div></div></div>
+            <img class="scr-ill" src="img/health.png" alt="" style="width:265px;margin:72px 0 0 87px">
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next data-toast="Apple Health access prompt opens here">Continue</button></div>
+        </section>
+
+        <!-- 11 · all in -->
+        <section class="scr" data-id="allin">
+          <div class="scr-body">
+            <div style="height:112px"></div>
+            <h1 class="scr-h1">You're all in<span data-b="nameComma"></span>!</h1>
+            <div class="scr-bub" style="margin:26px 16px 0">You just took a big step toward a better you. Now, let's get you moving and earning!</div>
+            <img class="scr-ill" src="img/allin.png" alt="" style="width:262px;margin-top:40px">
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Show me how</button></div>
+        </section>
+
+        <!-- 12 · gauge -->
+        <section class="scr" data-id="gauge">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog"><i></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">As you walk, your gauge goes up with every step.</div></div></div>
+            <div class="scr-gauge">
+              <svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="118" fill="none" stroke="#F7C099" stroke-width="27" stroke-linecap="round" stroke-dasharray="556 186" transform="rotate(130 150 150)"/><circle id="gFill" opacity="0" cx="150" cy="150" r="118" fill="none" stroke="#FF732C" stroke-width="27" stroke-linecap="round" stroke-dasharray="0 742" transform="rotate(130 150 150)"/></svg>
+              <img class="pd" src="img/panda_stand.png" alt="">
+              <div class="scr-gift" id="gGift"><svg width="24" height="24" viewBox="0 0 24 24" fill="#A7ADB5"><rect x="3" y="8" width="18" height="4" rx="1"/><rect x="4.5" y="12" width="15" height="9" rx="1"/><rect x="11" y="8" width="2" height="13" fill="#fff" opacity=".7"/><path d="M12 8c-2-3.5-5.5-3.5-5.5-1.3C6.5 8 9 8 12 8Zm0 0c2-3.5 5.5-3.5 5.5-1.3C17.5 8 15 8 12 8Z"/></svg></div>
+            </div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" id="gaugeCta">Next</button></div>
+        </section>
+
+        <!-- 13 · first wards (merged) -->
+        <section class="scr" data-id="wards">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div><div class="scr-prog" style="border-radius:0"><i style="width:100%"></i></div></div>
+          <div class="scr-body">
+            <div class="scr-wardy"><div class="scr-ava"><img src="img/wardy.png" alt=""></div><div><div class="scr-who">Wardy</div><div class="scr-bub">These are your first Wards, valuable points to unlock rewards.</div></div></div>
+            <div class="scr-wcard">
+              <div class="scr-wtop"><div class="pill"><i></i>30</div><div class="up">up to ⓘ</div><div class="eur">€ 0.16</div><span class="scr-coin"><b>W</b></span></div>
+              <div class="scr-wbody">
+                <div class="scr-wrow"><b>Gift Cards</b><span>See more</span></div>
+                <div style="display:flex;gap:12px;overflow:hidden"><div class="scr-gc"><img src="img/giftcard.png" alt=""></div><div class="scr-gc ph" style="background:#F2F3F5;width:60px"></div></div>
+                <div class="scr-wrow" style="margin-top:18px"><b>Give Back</b><span>See more</span></div>
+                <div class="scr-gc" style="width:250px"><img src="img/giveback.png" alt=""></div>
+              </div>
+            </div>
+            <div style="height:14px"></div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next>Next</button></div>
+        </section>
+
+        <!-- 14 · Premium perks (merged) -->
+        <section class="scr full" data-id="perks">
+          <div class="scr-body">
+            <div class="scr-hero" style="padding-top:55px;background:linear-gradient(100deg,#4532B6 0%,#7C58E6 55%,#CDADF7 100%)">
+              <img src="img/hero_perks.png" alt="">
+              <button class="scr-x" style="right:20.5px;top:79px" data-close="perks" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2 2 12" stroke="#7861FA" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="scr-gchip"><span id="perkChip">Your goal · 4,500 steps a day</span></div>
+            <h1 class="scr-ptitle" id="perkTitle" style="font-size:23px;margin-top:6px"></h1>
+            <p class="scr-psub" style="margin-top:5px">Premium members <em>earn 200% more Wards</em> on average.</p>
+            <div class="scr-tbl">
+              <div class="colbg"></div>
+              <div class="scr-tr h"><span></span><span>Free</span><span>Premium</span></div>
+              <div id="cmpRows"></div>
+            </div>
+          </div>
+          <div class="scr-foot" style="padding-top:12px"><button class="scr-cta pu" data-next>See my Premium plans</button></div>
+        </section>
+
+        <!-- 15 · plans (main paywall) -->
+        <section class="scr full" data-id="plans">
+          <div class="scr-body">
+            <div class="scr-hero" style="padding-top:37px;background:#6249D8">
+              <img src="img/hero_plans.png" alt="" style="margin-bottom:-2px">
+              <button class="scr-x" style="right:20.5px;top:68px" data-close="plans" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2 2 12" stroke="#7861FA" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+            </div>
+            <h1 class="scr-ptitle" style="margin-top:0">Earn Even More Rewards &amp; Unlock Exclusive Perks</h1>
+            <div class="scr-proof"><span class="stars">★★★★★</span><span><b>4.8</b> · 223K App Store ratings</span><span class="sep"></span><span><b>30M</b> walkers</span></div>
+            <div class="scr-plans">
+              <button class="scr-plan" data-plan="m"><span class="nm">1 Month</span><span class="pr">4,49 €/mo</span></button>
+              <button class="scr-plan yr on" data-plan="y"><span class="scr-badge">Most popular</span><span class="scr-save">SAVE 39%</span><span><span class="nm">12 Months</span><div class="old"><s>53,88 €</s>32,99 €</div></span><span class="pr">2,74 €/mo</span></button>
+            </div>
+          </div>
+          <div class="scr-foot" style="gap:10px;padding-top:12px">
+            <div class="scr-helper">Renews automatically. Cancel anytime.</div>
+            <button class="scr-cta pu" id="plansCta" data-buy>Start my FREE week</button>
+            <div class="scr-helper" id="plansBill"><b>No charge today.</b> Then billed at <b>32,99 €</b>/year</div>
+          </div>
+        </section>
+
+        <!-- 16 · offer paywall (new, on close) -->
+        <section class="scr sheet" data-id="offer">
+          <button class="scr-oclose" data-close="offer" aria-label="No thanks"><svg width="13" height="13" viewBox="0 0 14 14"><path d="M2 2l10 10M12 2 2 12" stroke="#7861FA" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+          <div class="scr-body">
+            <img class="scr-ill" src="img/panda_coins.png" alt="" style="width:150px;margin-top:22px">
+            <h1 class="scr-otitle" id="offerTitle"></h1>
+            <p class="scr-psub" style="margin-top:10px">Try every Premium perk for 7 days before you pay.</p>
+            <div class="scr-tl">
+              <div class="scr-tli"><div class="dt"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><b>Today · free</b><span>2x on your walking rewards and no ads, from your very next step.</span></div></div>
+              <div class="scr-tli"><div class="dt lt"><svg width="16" height="16" viewBox="0 0 24 24" fill="#5B45D6"><rect x="3" y="8" width="18" height="4" rx="1"/><rect x="4.5" y="12" width="15" height="9" rx="1"/><path d="M12 8c-2-3.5-5.5-3.5-5.5-1.3C6.5 8 9 8 12 8Zm0 0c2-3.5 5.5-3.5 5.5-1.3C17.5 8 15 8 12 8Z"/></svg></div><div><b>This weekend</b><span>Your weekend bonus lands on top of your <span data-b="goalShort">4,500</span>-step days.</span></div></div>
+              <div class="scr-tli" style="padding-bottom:0"><div class="dt lt"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5B45D6" stroke-width="2"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 7h12M5.5 1.5v3M10.5 1.5v3"/></svg></div><div><b>Day 7</b><span id="offerDay7">32,99 € for the year (2,74 €/mo). Cancel before and pay nothing.</span></div></div>
+            </div>
+          </div>
+          <div class="scr-foot" style="gap:10px">
+            <button class="scr-cta pu" id="offerCta" data-buy>Start my FREE week</button>
+            <button class="scr-down" id="downsell">Or go monthly: 4,49 €/month</button>
+          </div>
+        </section>
+
+        <!-- 17 · reminders (moved past paywall) -->
+        <section class="scr full" data-id="notif">
+          <div class="scr-body">
+            <div style="background:#F3FBF7;padding-top:47px"><img src="img/notif.png" alt="" style="width:390px;display:block"></div>
+            <h1 class="scr-h1" style="margin-top:38px">Don’t miss your rewards!</h1>
+            <p class="scr-p">I’ll remind you to save your progress to keep the rewards coming.</p>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" data-next data-toast="Notification permission prompt opens here">Remind me to convert my steps</button></div>
+        </section>
+
+        <!-- 18 · referral (moved to the end) -->
+        <section class="scr" data-id="referral">
+          <div class="scr-top"><div class="scr-backrow"><button class="scr-back" data-back>←</button></div></div>
+          <div class="scr-body">
+            <img class="scr-ill" src="img/referral.png" alt="" style="width:300px;margin-top:22px">
+            <h1 class="scr-h1" style="margin-top:36px">Got a referral code?</h1>
+            <p class="scr-p" style="font-size:16px">Use it to unlock an extra reward and turn your walks into a shared adventure with friends!</p>
+            <div class="scr-lab">Code</div>
+            <div class="scr-input soft"><input id="refIn" placeholder="Paste your code here" autocomplete="off"></div>
+          </div>
+          <div class="scr-foot"><button class="scr-cta" id="refCta" disabled data-end>Claim my referral reward</button><button class="scr-skip" data-end>Skip</button></div>
+        </section>
+
+        <div class="scr-toast" id="toast"></div>
+      </div>
+    </div>
+    <div class="st-chips" id="chips"></div>
+    <div class="st-hint">Jump to any screen — answers are pre-filled. The purple chip opens the offer paywall directly; it also opens when you close either Premium screen.</div>
+  </div>
+  <aside class="st-panelcol"><div class="pn" id="panel"></div></aside>
+</main>
+
+<section id="view-rank" class="rk" hidden>
+  <h2>Ranked changes</h2>
+  <p class="rk-sub">What changes in WeWard's onboarding and Premium paywall, highest expected impact first.</p>
+  <table>
+    <thead><tr><th>#</th><th>Priority</th><th>Change</th><th>What changed</th><th>Expected impact</th></tr></thead>
+    <tbody id="rkBody"></tbody>
+  </table>
+  <p class="rk-note">Impact ranges are Adapty's expected effect from teardowns and A/B tests across subscription apps — not measured lift for WeWard. Prices, ratings and quotes come from WeWard's own App Store listing, website and in-app screens; see <a data-open-src>Sources &amp; grounding</a>.</p>
+</section>
+
+<div class="st-modal" id="srcModal">
+  <div class="st-mcard">
+    <button class="st-mclose" data-close-src>×</button>
+    <h3>Sources &amp; grounding</h3>
+    <p class="s">Every price, rating, quote and figure in the prototype, and where it comes from. Checked 29 September 2026.</p>
+    <dl>
+      <h4>Used in the build</h4>
+      <dt>4.8 ★ from 223K ratings</dt><dd>App Store France listing, <a href="https://apps.apple.com/fr/app/weward-lapp-de-marche/id1454213029" target="_blank" rel="noopener">WeWard – L'app de Marche !</a> (id1454213029). Shown on the plans screen.</dd>
+      <dt>Premium Monthly 4,49 € · Premium Annual 32,99 €</dt><dd>App Store France in-app purchase list ("Premium Mensuel", "Premium Annuel"). Also the prices on WeWard's own plans screen.</dd>
+      <dt>Free week on the 12-month plan</dt><dd>WeWard's own paywall: "Start my FREE week" with "Billed at 32,99 €/year". The offer paywall's timeline describes this same trial. No trial is claimed for the monthly plan.</dd>
+      <dt>53,88 € crossed out · 2,74 €/mo</dt><dd>WeWard's own paywall. 53,88 € is 12 × 4,49 €.</dd>
+      <dt>"Save 39%"</dt><dd>Derived from WeWard's own prices: 32,99 € against 53,88 € is 38.8% less, rounded to 39%.</dd>
+      <dt>"Premium members earn 200% more Wards on average"</dt><dd>WeWard's own Premium screen, verbatim.</dd>
+      <dt>Free vs Premium rows</dt><dd>WeWard's own comparison screen: Track and earn Wards · 2x on your walking rewards · Weekend bonus · No ads · Monthly Exclusive Rewards · VIP Support.</dd>
+      <dt>30 million walkers across 29 countries</dt><dd><a href="https://www.wewardapp.com/" target="_blank" rel="noopener">wewardapp.com</a> ("Loved by 30 million walkers across 29 countries"). Matches "Like 30M users" on WeWard's own welcome screen.</dd>
+      <dt>WeWarders walk 24% more on average</dt><dd>wewardapp.com ("increase walking activity by 24%") and the App Store description ("les WeWarders marchent en moyenne 24 % de plus").</dd>
+      <dt>Three testimonials on the loader</dt><dd>wewardapp.com, "Why our users love it": Steve (App Store), Stella (Google Play Store), Nick (Trustpilot). Quoted verbatim, Stella's and Nick's shortened to their first sentence.</dd>
+      <dt>4,500-step daily goal</dt><dd>WeWard's own onboarding ("To get you started, I've set a daily goal for you"). The prototype keeps the number and does not recalculate it. 31,500 a week is 7 × 4,500.</dd>
+      <dt>30 Wards · up to € 0.16 · €25 Amazon gift card</dt><dd>WeWard's own first-Wards screens.</dd>
+      <dt>All illustrations and the Wardy character</dt><dd>Cropped from WeWard's own onboarding and paywall screens.</dd>
+      <h4>Found but not used</h4>
+      <dt>"4.9 stars on the App Store"</dt><dd>wewardapp.com. The French store shows 4.8, and the flow is priced in euros, so the store figure is used.</dd>
+      <dt>20 million / 25 million WeWarders</dt><dd>App Store description and release notes. They disagree with the 30M on the website and in the app, so only 30M appears.</dd>
+      <dt>$50M transferred to users · $1.5M donated</dt><dd>wewardapp.com. Dollar figures in a euro flow would read oddly; left out. The App Store's "+1 million euros collected" was also left out, since no screen needed it.</dd>
+      <dt>Backed by Venus Williams</dt><dd>wewardapp.com and press. A real proof point, but it needs an approved photo and wording; left out.</dd>
+      <dt>Card packs 0,99 € – 9,99 €</dt><dd>App Store IAP list. These are one-off purchases, not a subscription, so they were not used for the offer.</dd>
+      <dt>"1 Ward ≈ 1,500 steps"</dt><dd>A user review on the App Store. Not WeWard's own statement, so not used.</dd>
+    </dl>
+  </div>
+</div>
+
+<script>
+/* ───────── data ───────── */
+const ORDER=['hello','own','name','gender','age','goals','loader','goal','commit','health','allin','gauge','wards','perks','plans','offer','notif','referral'];
+const LABEL={hello:'Welcome',own:'Make it yours',name:'Name',gender:'Gender',age:'Age',goals:'Motivations',loader:'Loader',goal:'Daily goal',commit:'Commitment',health:'Apple Health',allin:'All in',gauge:'Gauge',wards:'First Wards',perks:'Premium perks',plans:'Plans',offer:'Offer paywall ★',notif:'Reminders',referral:'Referral code'};
+const PROG=['name','gender','age','goals','loader','goal','commit','health','gauge'];
+const GOALS=[
+  {id:'compete',t:'Compete with friends',ic:'trophy',c:'#6B2BD9',tint:'#F7F0FE'},
+  {id:'charity',t:'Support charities',ic:'charity',c:'#0E8F7E',tint:'#ECF9F6'},
+  {id:'weight',t:'Lose weight',ic:'weight',c:'#D6336C',tint:'#FDEFF4'},
+  {id:'walk',t:'Walk more',ic:'heart',c:'#E5383B',tint:'#FFF0F0'},
+  {id:'rewards',t:'Earn rewards',ic:'gift',c:'#E8641B',tint:'#FFF3EA'},
+  {id:'co2',t:'Reduce CO2',ic:'leaf',c:'#1F9D55',tint:'#EDF9F1'},
+  {id:'fun',t:'Play & have fun',ic:'game',c:'#2F6FE0',tint:'#EEF4FE'}];
+const GIFT=document.getElementById('gGift').innerHTML;
+const CMP=['Track and earn Wards','2x on your walking rewards','Weekend bonus','No ads','Monthly Exclusive Rewards','VIP Support'];
+const S={name:'Camille',gender:'female',age:30,goals:['walk','compete'],plan:'y',offerPlan:'y'};
+
+const P={
+hello:{t:'Welcome — Hi! I’m Wardy',tags:['kept','moved'],
+ why:'The flow now opens on the screen that carries your strongest proof: "Like 30M users" plus Wardy himself. Cold installs meet the character and the community size before they are asked for anything.',
+ kept:'The screen as shipped: the centred "Hi! I\'m Wardy." headline, the mint speech bubble with its green outline, the waving panda on the #3CE88A disc, and the full-width orange pill button.',
+ ship:'Third screen. It came after "Make the App Your Own" and the referral-code screen.',iv:'CR +3–8%',il:'Early social proof for cold traffic'},
+own:{t:'Make the App Your Own',tags:['kept','moved'],
+ why:'This screen tells people the next questions are for them. It now sits directly before the first question, so the promise is followed by the questions it announces.',
+ kept:'The blue phone illustration with the winking panda and the three floating pins, the 27px bold headline, the grey back disc with the orange arrow.',
+ ship:'First screen of the flow. The referral screen and the welcome sat between it and the first question.',iv:'CR +3–8%',il:'Expectation set before the quiz'},
+name:{t:'What’s your name?',tags:['kept'],
+ why:'The name is a personalization input, not an account step, so it stays early. What changes is downstream: it now comes back on the gender bubble, the loader, "You\'re all in", the Premium headline and the offer.',
+ kept:'Wardy\'s avatar with the clipboard, the two-bubble conversation layout, the orange-outlined input, the peach disabled button and the orange Skip link.',
+ ship:'Same place. Before, the name was asked and never used again in the flow.',iv:'CR +3–8%',il:'Answer reused by name'},
+gender:{t:'Which option fits you best?',tags:['kept'],
+ why:'Kept, and now consumed: the loader shows "Fine-tuning calorie estimates" only when a gender was given, which is exactly the reason this screen gives.',
+ kept:'The three full-width option cards, the orange check disc and #FEF2EA fill on the selected card, the helper bubble about calorie estimates.',
+ ship:'Same place. The greeting was "Nice to meet you!" with no name; it now uses the name from the step before.',iv:'CR +3–8%',il:'Personalized greeting'},
+age:{t:'How old are you?',tags:['kept'],
+ why:'Your own copy promises that age adapts goals and rewards. The loader and the goal screen now show the age back, so the promise is visibly kept.',
+ kept:'The iOS-style wheel with its two thin grey rules and the fading rows, rebuilt as a working scroll-snap wheel, and the "not counting candles" bubble.',
+ ship:'Same place. The age disappeared after this screen.',iv:'CR +5–10%',il:'Answer shown back downstream'},
+goals:{t:'What brings you to WeWard?',tags:['kept'],
+ why:'Seven motivations is the richest input in the flow, and in the shipping flow nothing reads it. It now drives the loader, the goal screen chips and the Premium chip.',
+ kept:'The multi-select chips with their own icons and colour per motivation (purple trophy, red heart), laid out in the same wrapping rows.',
+ ship:'Same place. Before, the choices were never mentioned again.',iv:'CR +10–20%',il:'Goal capture that pays off'},
+loader:{t:'Setting things up for you',tags:['new'],
+ why:'A short loader that plays back what was just answered: the motivations, the age, the calorie note. It only works because a real result follows it, the daily goal. Your own testimonials rotate underneath.',
+ kept:'Wardy\'s bubble layout and mint card style, the orange progress bar, and three quotes from your website shown verbatim.',
+ ship:'Did not exist. The flow went from the motivations straight to Apple Health.',iv:'CR +10–15%',il:'Loader that consumes the answers'},
+goal:{t:'Your daily goal: 4,500 steps',tags:['kept','new'],
+ why:'This is the payoff for the questions. The goal stays exactly as your app sets it; the screen now lists the answers it was set from and turns it into a week.',
+ kept:'The 4,500 in #16936B inside the white disc with the mint glow, the "I\'ve set a daily goal for you" bubble, the progress bar without a back button.',
+ ship:'Came after Apple Health. It did not show which answers it was built from.',iv:'CR +10–20%',il:'Personalized result before the paywall'},
+commit:{t:'I will reach my goal',tags:['kept'],
+ why:'A commitment step right after the goal is set. The hold-to-commit gesture makes it an action rather than a tap, and your +24% walking figure gives the reason to believe it.',
+ kept:'The glowing mint star, the "I will reach my goal" headline and the subline, verbatim.',
+ ship:'Same position after the goal. The 24% figure only appeared in the App Store text.',iv:'CR +5–15%',il:'Commitment screen with proof'},
+health:{t:'Apple Health',tags:['kept','moved'],
+ why:'Health access is needed for day-one value, so it stays before the paywall. It moves to the moment it is needed: right before the gauge that fills with steps.',
+ kept:'The Health mock with "Turn On all" and the four toggles, and the Apple Watch bubble.',
+ ship:'Came right after the motivations, before the goal existed.',iv:'CR +5–10%',il:'Permission asked in context'},
+allin:{t:'You’re all in!',tags:['kept'],
+ why:'The celebration stays, now with the name. It closes the setup and hands over to the tutorial.',
+ kept:'The jumping panda on the green disc, the bubble copy and the "Show me how" button.',
+ ship:'Came after the notification request. That request now runs after the paywall.',iv:'CR +3–8%',il:'Personalized celebration'},
+gauge:{t:'Your gauge',tags:['kept'],
+ why:'The best teaching screen in the flow. It stays, and Next now fills the gauge and swaps the gift for a coin, so people see the mechanic work.',
+ kept:'The thick peach arc with the rounded ends, the panda standing inside it, the gift disc at the end of the arc.',
+ ship:'Same place.',iv:'CR +3–8%',il:'Value shown before the price'},
+wards:{t:'Your first Wards',tags:['merged'],
+ why:'The filled gauge and the gift-card list were two states of one moment. They are one screen now: 30 Wards, what they are worth, and what they buy.',
+ kept:'The orange-to-amber card with the 30-Ward pill, "up to € 0.16" and the big gold W coin, and the Gift Cards and Give Back rows with the €25 Amazon card.',
+ ship:'Two screens: the gauge filling, then the card sliding up over the gift-card list.',iv:'CR +5–10%',il:'Aha moment right before the paywall'},
+perks:{t:'Premium perks',tags:['merged','new'],
+ why:'Two screens in a row listed the same perks. They are one screen now, led by the name and the goal the flow just set. Your Free vs Premium table does the explaining.',
+ kept:'The purple hero with the flying panda and the diamond Premium mark, the "earn 200% more Wards" line in its purple accent, the table with the lavender Premium column.',
+ ship:'Two screens: the four perk icons, then the Free vs Premium table. Both headlines were the same for everyone.',iv:'CR +15–20%',il:'Goal-personalized paywall'},
+plans:{t:'Plans',tags:['kept'],
+ why:'Your plans screen is strong and stays as it is. Three things are added at the decision point: your App Store rating, a Save 39% tag, and "No charge today" under the button.',
+ kept:'The hero with the panda and the four orbiting reward icons, both plan cards, the "Most popular" tab, the 53,88 € strikethrough, the purple "Start my FREE week" button.',
+ ship:'Same plans. No rating, no saving shown, and the free week lived only in the button label.',iv:'CR +10–15%',il:'Proof and savings at the decision point'},
+offer:{t:'Offer paywall — on close',tags:['new'],
+ why:'Closing either Premium screen used to end the flow. It now opens one more screen: the free week you already offer, laid out day by day, with the monthly plan as the lighter option.',
+ kept:'Your purple Premium palette, the running panda with the coins, the pill button. The trial and both prices are yours.',
+ ship:'Did not exist. The close button went straight to the notification request.',iv:'ARPU +10–15%',il:'Second chance before the flow ends'},
+notif:{t:'Don’t miss your rewards!',tags:['moved'],
+ why:'A system prompt right before the paywall pulls attention away from the decision. Reminders now come after it, when there is nothing left to lose.',
+ kept:'The whole screen: the teal star backdrop, the Wardy notification card, the panda with the phone, and the "Remind me to convert my steps" button.',
+ ship:'Came before "You\'re all in", ahead of the tutorial and the paywall.',iv:'CR +10–15%',il:'Permission moved past the paywall'},
+referral:{t:'Got a referral code?',tags:['moved'],
+ why:'A code field was the second thing people saw, before any value. Most people have no code, so it was a skip screen at the most fragile moment. It now closes the flow.',
+ kept:'The two high-fiving pandas on the yellow sun, the copy, the grey code field and the disabled-until-filled button.',
+ ship:'Second screen of the flow.',iv:'CR +5–10%',il:'Friction moved out of the first minute'}
+};
+
+const RANK=[
+ ['f','Answers used, not just collected','You ask for age, gender and up to seven motivations, and none of them comes back. A short loader and the goal screen now show them, before any price.','CR +10–20%'],
+ ['h','Premium screen names the goal','The Premium screens say the same thing to everyone. The headline now uses the first name and the 4,500-step goal the flow just set.','CR +15–20%'],
+ ['h','Second screen when the paywall closes','Closing the paywall ends the flow. It now opens one more screen: your free week laid out day by day, plus the 4,49 € monthly plan.','ARPU +10–15%'],
+ ['h','Reminders asked after the paywall','The notification request came just before the tutorial and the paywall. It now comes after the paywall.','CR +10–15%'],
+ ['h','Your rating next to the plans','There is no rating or user count on the Premium screens. Your 4.8 from 223K App Store ratings and "30M walkers" now sit above the plans.','CR +10–15%'],
+ ['h','Referral code moved to the end','A code field was the second screen, before anyone saw what WeWard does. It now closes the flow.','CR +5–10%'],
+ ['m','Two perk screens become one','Two screens in a row listed the same Premium perks. They are now one screen with your Free vs Premium table.','CR +5–10%'],
+ ['m','Yearly saving made obvious','The 12-month card shows 53,88 € crossed out, with no saving stated. It now says Save 39%.','CR +5–15% · ARPU +10–15%'],
+ ['m','Apple Health asked when it’s needed','Health access was asked before the goal existed. It now comes right before the gauge that uses it.','CR +5–10%'],
+ ['m','"No charge today" under the button','The free week appeared only in the button label. The line under it now says no charge today, then 32,99 € a year.','CR +3–8%'],
+ ['l','First name used','You ask for the name and then say "Nice to meet you!" without it. It now appears on the next screens.','CR +3–8%']
+];
+
+/* ───────── helpers ───────── */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const scr=id=>document.querySelector(`.scr[data-id="${id}"]`);
+const fmt=n=>n.toLocaleString('en-US');
+const selGoals=()=>S.goals.map(id=>GOALS.find(g=>g.id===id)).filter(Boolean);
+let toastT; function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800)}
+
+/* ───────── build dynamic parts ───────── */
+$('#genderOpts').innerHTML=[['female','Female'],['male','Male'],['none','Prefer not to say']].map(([v,t])=>`<button class="scr-opt" data-g="${v}"><span class="rd"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.3 5 8.6 9.6 3.6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>${t}</button>`).join('');
+$('#goalChips').innerHTML=GOALS.map(g=>`<button class="scr-chipb" data-goal="${g.id}" style="--c:${g.c};--t:${g.tint}"><span class="gi" style="-webkit-mask-image:url(img/ch_${g.ic}.png);mask-image:url(img/ch_${g.ic}.png)"></span>${g.t}</button>`).join('');
+const CHK='<svg width="30" height="30" viewBox="0 0 30 30"><path d="M6 15.5l6 5.5L24 9" stroke="#715BE4" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+$('#cmpRows').innerHTML=CMP.map((r,i)=>`<div class="scr-tr"><span class="lb">${r}</span><span class="c">${i===0?CHK:'<i class="dash"></i>'}</span><span class="c">${CHK}</span></div>`).join('');
+const col=$('#ageCol'),H=34; let ages='';for(let a=13;a<=99;a++)ages+=`<div class="scr-wheel-it" data-a="${a}">${a}</div>`;
+col.innerHTML=`<div class="scr-wheel-sp"></div>${ages}<div class="scr-wheel-sp"></div>`;
+$('#chips').innerHTML=ORDER.map(id=>`<button class="st-chip${id==='offer'?' offer':''}" data-jump="${id}">${LABEL[id]}</button>`).join('');
+$('#rkBody').innerHTML=RANK.map((r,i)=>`<tr><td class="n">${i+1}</td><td><span class="rk-pr ${r[0]}">${{f:'Fix first',h:'High',m:'Medium',l:'Low'}[r[0]]}</span></td><td class="c">${r[1]}</td><td>${r[2]}</td><td class="i">${r[3]}</td></tr>`).join('');
+
+/* ───────── state → screens ───────── */
+function syncScreen(){
+  const nm=S.name.trim().split(' ')[0];
+  $$('[data-b="nameComma"]').forEach(e=>e.textContent=nm?`, ${nm}`:'');
+  $('#nameIn').value=S.name; $('#nameCta').disabled=!S.name.trim();
+  $$('.scr-opt').forEach(b=>b.classList.toggle('on',b.dataset.g===S.gender));
+  $$('.scr-chipb').forEach(b=>b.classList.toggle('on',S.goals.includes(b.dataset.goal)));
+  $('#goalsCta').disabled=!S.goals.length;
+  const g=selGoals();
+  // loader lines
+  const L=[];
+  L.push(g.length?`Noting what brings you here: ${g.map(x=>x.t).join(', ')}`:'Noting what brings you here');
+  if(S.age) L.push(`Adapting goals to your walking pace at ${S.age}`);
+  if(S.gender&&S.gender!=='none') L.push('Fine-tuning your calorie estimates');
+  L.push('Setting your first daily goal');
+  $('#ldLines').innerHTML=L.map(t=>`<div class="scr-line"><span class="dotc"><svg width="12" height="12" viewBox="0 0 12 12"><path d="M2.5 6.3 5 8.6 9.6 3.6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>${t}</span></div>`).join('');
+  // goal tags
+  const tags=[]; if(S.age)tags.push(`Age ${S.age}`); g.forEach(x=>tags.push(x.t));
+  $('#goalTags').innerHTML=(tags.length?tags:['Your walking pace']).map(t=>`<span>${t}</span>`).join('');
+  // premium
+  $('#perkTitle').innerHTML=nm?`${nm}, get <em>2x Wards</em> on every step toward your goal`:`Get <em>2x Wards</em> on every step toward your goal`;
+  $('#perkChip').textContent=g.length?`${g[0].t} · 4,500 steps a day`:'Your goal · 4,500 steps a day';
+  // plans
+  $$('.scr-plan').forEach(b=>b.classList.toggle('on',b.dataset.plan===S.plan));
+  if(S.plan==='y'){$('#plansCta').textContent='Start my FREE week';$('#plansBill').innerHTML='<b>No charge today.</b> Then billed at <b>32,99 €</b>/year';}
+  else{$('#plansCta').textContent='Continue';$('#plansBill').innerHTML='Billed at <b>4,49 €</b>/month';}
+  // offer
+  $('#offerTitle').innerHTML=nm?`${nm}, your <em>free week</em> is still here`:`Your <em>free week</em> is still here`;
+  const dn=$('#downsell');
+  if(S.offerPlan==='y'){$('#offerCta').textContent='Start my FREE week';dn.textContent='Or go monthly: 4,49 €/month';dn.classList.remove('on');}
+  else{$('#offerCta').textContent='Continue with 4,49 €/month';dn.textContent='Switch back to the free week';dn.classList.add('on');}
+  // progress
+  $$('.scr').forEach(s=>{const i=PROG.indexOf(s.dataset.id);const bar=s.querySelector('.scr-prog i');if(bar&&i>=0)bar.style.width=((i+1)/PROG.length*100)+'%'});
+}
+
+/* ───────── router ───────── */
+let cur=null,hist=[],timers=[];
+const LIGHT_STATUS=['perks','plans'];
+function clearTimers(){timers.forEach(clearTimeout);timers=[];clearInterval(qInt)}
+function show(id,{back=false,jump=false}={}){
+  clearTimers();
+  const next=scr(id), prev=cur&&scr(cur);
+  if(jump){$$('.scr').forEach(s=>{s.classList.add('nofx');s.classList.remove('is-active','is-past')});
+    ORDER.slice(0,ORDER.indexOf(id)).forEach(k=>{if(!scr(k).classList.contains('sheet'))scr(k).classList.add('is-past')});
+    next.classList.add('is-active');requestAnimationFrame(()=>requestAnimationFrame(()=>$$('.scr').forEach(s=>s.classList.remove('nofx'))));}
+  else{
+    if(prev){prev.classList.remove('is-active'); if(!back&&!prev.classList.contains('sheet'))prev.classList.add('is-past');}
+    next.classList.remove('is-past'); next.classList.add('is-active');
+  }
+  cur=id;
+  $('#status').classList.toggle('lt',LIGHT_STATUS.includes(id));
+  $$('.st-chip').forEach(c=>c.classList.toggle('on',c.dataset.jump===id));
+  renderPanel(id); syncScreen(); enter(id);
+}
+function go(id){hist.push(cur);show(id)}
+function nextOf(id){return {plans:'notif',offer:'notif'}[id]||ORDER[ORDER.indexOf(id)+1]}
+function back(){if(!hist.length)return;const p=hist.pop();const c=scr(cur);c.classList.remove('is-active');show(p,{back:true})}
+
+/* ───────── per-screen entry ───────── */
+let qInt;
+function enter(id){
+  if(id==='age'){col.scrollTop=(S.age-13)*H;paintWheel();}
+  if(id==='loader'){
+    const ls=$$('#ldLines .scr-line'); ls.forEach(l=>l.className='scr-line');
+    ls.forEach((l,i)=>{timers.push(setTimeout(()=>{l.classList.add('run')},i*850));timers.push(setTimeout(()=>{l.classList.remove('run');l.classList.add('done')},i*850+750))});
+    let q=0; const tr=$('#qTrack'),ds=$$('#qDots i'); tr.style.transform='translateX(0)'; ds.forEach((d,i)=>d.classList.toggle('on',i===0));
+    qInt=setInterval(()=>{q=(q+1)%3;tr.style.transform=`translateX(-${q*100}%)`;ds.forEach((d,i)=>d.classList.toggle('on',i===q))},1700);
+    timers.push(setTimeout(()=>go('goal'),ls.length*850+1100));
+  }
+  if(id==='commit'){$('#star').classList.remove('hold','done');$('#starRing').style.width='0';$('#holdHint').textContent='Press and hold the star';}
+  if(id==='gauge'){const f=$('#gFill');f.style.transition='none';f.setAttribute('stroke-dasharray','0 742');f.setAttribute('opacity','0');const gg0=$('#gGift');gg0.innerHTML=GIFT;$('#gGift').classList.remove('coin');$('#gaugeCta').disabled=false;}
+}
+
+/* ───────── interactions ───────── */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,[data-open-src],[data-close-src]'); if(!t)return;
+  if(t.dataset.jump){hist=ORDER.slice(0,ORDER.indexOf(t.dataset.jump)).filter(k=>k!=='offer');show(t.dataset.jump,{jump:true});return}
+  if(t.hasAttribute('data-back')){back();return}
+  if(t.hasAttribute('data-next')){if(t.disabled)return;if(t.dataset.toast)toast(t.dataset.toast);go(nextOf(cur));return}
+  if(t.dataset.skip){if(t.dataset.skip==='name')S.name='';if(t.dataset.skip==='gender')S.gender='none';if(t.dataset.skip==='age')S.age=null;go(nextOf(cur));return}
+  if(t.dataset.close){if(t.dataset.close==='offer'){go('notif')}else{go('offer')}return}
+  if(t.dataset.g){S.gender=t.dataset.g;syncScreen();return}
+  if(t.dataset.goal){const g=t.dataset.goal;S.goals=S.goals.includes(g)?S.goals.filter(x=>x!==g):[...S.goals,g];syncScreen();return}
+  if(t.dataset.plan){S.plan=t.dataset.plan;syncScreen();return}
+  if(t.id==='downsell'){S.offerPlan=S.offerPlan==='y'?'m':'y';syncScreen();return}
+  if(t.hasAttribute('data-buy')){toast('App Store purchase sheet opens here');timers.push(setTimeout(()=>go('notif'),900));return}
+  if(t.hasAttribute('data-end')){if(t.disabled)return;toast('End of the prototype — back to the start');timers.push(setTimeout(()=>{hist=[];show('hello',{jump:true})},1200));return}
+  if(t.id==='gaugeCta'){t.disabled=true;const f=$('#gFill');f.setAttribute('opacity','1');f.style.transition='stroke-dasharray 1.3s ease';requestAnimationFrame(()=>f.setAttribute('stroke-dasharray','556 186'));
+    timers.push(setTimeout(()=>{const gg=$('#gGift');gg.classList.add('coin');gg.innerHTML='<span style="font:italic 900 20px/1 Inter;color:#fff;text-shadow:0 1px 0 #D99500">W</span>'},1200));
+    timers.push(setTimeout(()=>go('wards'),1900));return}
+  if(t.dataset.tab){$$('.st-tab').forEach(b=>b.classList.toggle('on',b===t));$('#view-proto').hidden=t.dataset.tab!=='proto';$('#view-rank').hidden=t.dataset.tab!=='rank';return}
+});
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-open-src]')){e.preventDefault();$('#srcModal').classList.add('open')}
+  if(e.target.closest('[data-close-src]')||e.target.id==='srcModal')$('#srcModal').classList.remove('open');
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#srcModal').classList.remove('open')});
+$('#nameIn').addEventListener('input',e=>{S.name=e.target.value;$('#nameCta').disabled=!S.name.trim()});
+$('#refIn').addEventListener('input',e=>{$('#refCta').disabled=!e.target.value.trim()});
+
+// wheel
+function paintWheel(){const idx=Math.round(col.scrollTop/H);$$('.scr-wheel-it').forEach((it,i)=>{const d=Math.abs(i-idx);it.style.opacity=Math.max(.18,1-d*.28);it.style.transform=`scale(${d===0?1.12:1-d*.04})`})}
+let wT; col.addEventListener('scroll',()=>{paintWheel();clearTimeout(wT);wT=setTimeout(()=>{S.age=13+Math.round(col.scrollTop/H);syncScreen()},120)});
+
+// hold-to-commit
+(()=>{const st=$('#star'),ring=$('#starRing');let iv,t0;
+ const stop=()=>{clearInterval(iv);if(!st.classList.contains('done')){st.classList.remove('hold');ring.style.width='0'}};
+ st.addEventListener('pointerdown',e=>{e.preventDefault();if(st.classList.contains('done'))return;st.classList.add('hold');t0=Date.now();clearInterval(iv);
+  iv=setInterval(()=>{const p=Math.min(1,(Date.now()-t0)/1200);ring.style.width=p*100+'%';if(p>=1){clearInterval(iv);st.classList.add('done');$('#holdHint').textContent='Committed. Let’s go!';timers.push(setTimeout(()=>go('health'),700))}},16)});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>st.addEventListener(ev,stop));})();
+
+// panel
+function renderPanel(id){const p=P[id],n=ORDER.indexOf(id)+1;
+ $('#panel').innerHTML=`<div class="pn-step">Step ${n} of ${ORDER.length}</div><div class="pn-title">${p.t}</div>
+ <div class="pn-tags">${p.tags.map(t=>`<span class="pn-tag ${t}">${t}</span>`).join('')}</div>
+ <div class="pn-sec"><div class="pn-lab">Rationale</div><div class="pn-txt">${p.why}</div></div>
+ <div class="pn-sec"><div class="pn-lab">Kept from your app</div><div class="pn-txt">${p.kept}</div></div>
+ <div class="pn-sec"><div class="pn-lab">In the shipping flow</div><div class="pn-txt">${p.ship}</div></div>
+ <div class="pn-imp"><div class="v">${p.iv}</div><div class="l">${p.il}</div></div>
+ <div class="pn-foot"><b>Grounding.</b> Impact ranges are Adapty's expected effect from teardowns and A/B tests across subscription apps — not measured lift for WeWard. Prices, ratings, quotes and feature rows come from WeWard's own App Store listing, website and in-app screens; see <a data-open-src>Sources &amp; grounding</a>.</div>`}
+
+// back buttons → arrow glyph
+$$('.scr-back').forEach(b=>b.innerHTML='<svg width="20" height="20" viewBox="0 0 20 20"><path d="M16.5 10H4M9 4.5 3.5 10 9 15.5" stroke="#F67538" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+
+// deep link ?s=<id>
+const q=new URLSearchParams(location.search).get('s');
+show(ORDER.includes(q)?q:'hello',{jump:true});
+</script>
+</body>
+</html>
